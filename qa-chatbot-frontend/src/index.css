@@ -1,0 +1,413 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Prevent flash of unstyled content */
+html {
+  background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+  min-height: 100vh;
+  /* Remove global scroll-behavior to prevent conflicts with chat scrolling */
+  /* scroll-behavior: smooth; */
+}
+
+body {
+  background: transparent;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Chat-specific scrolling styles */
+.chat-page html,
+.chat-page body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Messages container scrolling */
+.messages-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling for chat messages */
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Custom scrollbar for settings page and other content areas */
+.settings-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #6e6e6e, #5e5d5f);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #4e4e50, #5d5d5e);
+}
+
+/* Firefox support for settings scrollbar */
+.settings-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #656566 rgba(255, 255, 255, 0.1);
+}
+
+/* General custom scrollbar for other components */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Firefox support for custom scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar scrollbar styles */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Firefox support for sidebar scrollbar */
+.sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Dark theme scrollbar */
+.dark-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Firefox support for dark scrollbar */
+.dark-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile-specific chat scrolling */
+@media (max-width: 768px) {
+  /* Prevent zoom on input focus */
+  .chat-page input, 
+  .chat-page textarea, 
+  .chat-page select {
+    font-size: 16px !important;
+  }
+  
+  /* Enhanced mobile scrolling for chat */
+  .messages-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Fix for iOS Safari */
+  @supports (-webkit-touch-callout: none) {
+    .chat-main-container {
+      height: -webkit-fill-available;
+    }
+  }
+}
+
+/* Ensure proper touch scrolling on mobile for chat */
+@media (hover: none) and (pointer: coarse) {
+  .messages-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: none;
+  }
+}
+
+/* Page transition styles */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+}
+
+/* Smooth link transitions */
+a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Prevent layout shift */
+.main-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Loading state for navigation */
+.navigation-loading {
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Smooth scroll behavior for non-chat pages */
+.non-chat-page {
+  scroll-behavior: smooth;
+}
+
+/* Mobile menu animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.mobile-menu-enter {
+  animation: slideDown 0.2s ease-out;
+}
+
+.mobile-menu-exit {
+  animation: slideUp 0.2s ease-in;
+}
+
+/* Modal animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-backdrop {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  animation: modalScaleIn 0.3s ease-out;
+}
+
+/* Prevent flicker on page load */
+.page-loading {
+  visibility: hidden;
+}
+
+.page-loaded {
+  visibility: visible;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered animations for profile cards */
+.stagger-animation {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggerIn 0.6s ease-out forwards;
+}
+
+.stagger-animation:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.stagger-animation:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.stagger-animation:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes staggerIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth focus transitions */
+input:focus,
+textarea:focus,
+button:focus {
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Active state for navigation */
+.nav-active {
+  position: relative;
+}
+
+.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  animation: slideInFromCenter 0.3s ease-out;
+}
+
+@keyframes slideInFromCenter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Hover effects for cards */
+.card-hover {
+  transition: all 0.3s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Button press effect */
+.btn-press {
+  transition: transform 0.1s ease-in-out;
+}
+
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

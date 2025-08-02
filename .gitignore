@@ -1,0 +1,14 @@
+qa-chatbot-backend/node_modules
+qa-chatbot-backend/package-lock.json
+
+qa-chatbot-frontend/package-lock.json
+qa-chatbot-frontend/node_modules
+
+qa-chatbot-backend/.env
+qa-chatbot-backend/addUser.js
+
+qa-chatbot-frontend/.env
+
+.env
+*/.env
+qa-chatbot-backend/uploads
