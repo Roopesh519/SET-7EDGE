@@ -25,12 +25,10 @@ export default function HomePage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                                {/* <span className="text-white font-bold text-sm">TM</span> */}
-                                <img src='ai.png' alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
+                            <div className="flex items-center gap-4 bg-white bg-opacity-90 border border-white border-opacity-20 rounded-xl p-2 shadow-lg">
+                                <img src='7EDGE.png' alt="SET Mate Logo" className="h-8" />
                             </div>
-                            {/* <h1 className="text-xl font-bold">TestMate AI</h1> */}
-                            <img src='testmate-ai.png' alt="TestMate AI Logo" className="h-8" />
+                            <h1 className="text-[40px] font-bold">SET Mate</h1>
                         </div>
                         <nav className="hidden md:flex items-center space-x-8">
                             <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
@@ -87,7 +85,7 @@ export default function HomePage() {
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold mb-4">Experience the Future of Testing</h2>
                         <p className="text-gray-300 max-w-2xl mx-auto">
-                            Interact with our AI-powered testing environment and see how TestMate AI transforms your development workflow.
+                            Interact with our AI-powered testing environment and see how SET Mate transforms your development workflow.
                         </p>
                     </div>
                     <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gradient-to-br from-gray-900 to-black relative">
@@ -111,7 +109,7 @@ export default function HomePage() {
 
                             {/* Overlay to cover "Built with Spline" watermark */}
                             <div className="absolute bottom-7 right-4 z-20 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-lg text-xs font-medium shadow-lg backdrop-blur-sm bg-opacity-90">
-                                Powered by TestMate AI
+                                Powered by SET Mate
                             </div>
                         </div>
                     </div>
@@ -222,7 +220,7 @@ export default function HomePage() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Testing?</h2>
                     <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                        Join thousands of developers who are already using TestMate AI to build better software faster.
+                        Join thousands of developers who are already using SET Mate to build better software faster.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                         <a
@@ -246,15 +244,13 @@ export default function HomePage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row justify-between items-center">
                         <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                                {/* <span className="text-white font-bold text-sm">TM</span> */}
-                                <img src='ai.png' alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
+                            <div className="flex items-center gap-4 bg-white bg-opacity-90 border border-white border-opacity-20 rounded-xl p-2 shadow-lg">
+                                <img src='7EDGE.png' alt="SET Mate Logo" className="h-5" />
                             </div>
-                            {/* <h1 className="text-xl font-bold">TestMate AI</h1> */}
-                            <img src='testmate-ai.png' alt="TestMate AI Logo" className="h-8" />
+                            <h1 className="text-[20px] font-bold">SET Mate</h1>
                         </div>
-                        <div className="text-gray-400 text-sm">
-                            © 2025 TestMate AI. All rights reserved.
+                        <div className="text-gray-400 text-sm p-2">
+                            © 2025 SET Mate. All rights reserved.
                         </div>
                     </div>
                 </div>

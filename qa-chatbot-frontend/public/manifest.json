@@ -1,6 +1,6 @@
 {
-  "short_name": "Testmate AI",
-  "name": "Testmate AI",
+  "short_name": "SET Mate",
+  "name": "SET Mate",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,12 +8,12 @@
       "type": "image/x-icon"
     },
     {
-      "src": "ai.png",
+      "src": "7EDGE.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "ai.png",
+      "src": "7EDGE.png",
       "type": "image/png",
       "sizes": "512x512"
     }

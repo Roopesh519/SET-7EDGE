@@ -173,7 +173,7 @@ export default function Register() {
         {/* Logo */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center gap-4 bg-white bg-opacity-90 border border-white border-opacity-20 rounded-xl p-4 shadow-lg">
-            <img src="ai.png" alt="Logo" className="w-14 h-14 rounded-lg object-cover" />
+            <img src="7EDGE.png" alt="Logo" className="w-44 h-15 rounded-lg object-cover" />
           </div>
         </div>
 

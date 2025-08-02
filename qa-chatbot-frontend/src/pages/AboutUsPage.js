@@ -41,7 +41,7 @@ export default function AboutUsPage() {
                     <div className="flex flex-col bg-white bg-opacity-90 backdrop-blur-md border border-white border-opacity-20 rounded-xl shadow-xl min-h-0 h-[calc(100%-0.80rem)]">
                         <div className="flex-1 overflow-y-auto settings-scrollbar">
                             <div className="max-w-6xl mx-auto p-6">
-                                <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">About TestMate AI</h1>
+                                <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">About SET Mate</h1>
 
                                 {/* Hero Section with 3D Model */}
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -51,7 +51,7 @@ export default function AboutUsPage() {
 
                                         {/* Custom overlay to cover Spline watermark */}
                                         <div className="absolute bottom-4 right-4 z-20 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-lg text-xs font-medium shadow-lg backdrop-blur-sm bg-opacity-90">
-                                            TestMate AI
+                                            SET Mate
                                         </div>
                                     </div>
 
@@ -59,7 +59,7 @@ export default function AboutUsPage() {
                                     <div className="flex flex-col justify-center space-y-6">
                                         <h2 className="text-2xl font-bold text-gray-800">Our Mission</h2>
                                         <p className="text-gray-700 text-lg leading-relaxed">
-                                            TestMate AI is revolutionizing the world of software testing and quality assurance through intelligent automation.
+                                            SET Mate is revolutionizing the world of software testing and quality assurance through intelligent automation.
                                             We empower developers and QA professionals with cutting-edge AI tools that streamline test creation,
                                             enhance coverage, and accelerate delivery cycles.
                                         </p>
@@ -148,7 +148,7 @@ export default function AboutUsPage() {
                                 <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-8 text-white text-center">
                                     <h2 className="text-2xl font-bold mb-4">Let's Connect</h2>
                                     <p className="mb-6 text-indigo-100">
-                                        Have questions about TestMate AI or want to collaborate? We'd love to hear from you!
+                                        Have questions about SET Mate or want to collaborate? We'd love to hear from you!
                                     </p>
                                     <div className="flex flex-wrap justify-center gap-4">
                                         <a
@@ -161,7 +161,7 @@ export default function AboutUsPage() {
                                             href="/chat"
                                             className="bg-white text-indigo-600 hover:bg-gray-100 px-6 py-3 rounded-lg font-medium transition-all duration-200"
                                         >
-                                            Try TestMate AI
+                                            Try SET Mate
                                         </a>
                                     </div>
                                 </div>

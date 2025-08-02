@@ -44,7 +44,7 @@ export default function ChatHeader({
   const handleNavigation = (path, callback) => {
     // Get current path to check if we're already on the page
     const currentPath = window.location.pathname;
-    
+
     // Don't navigate if already on the page
     if (currentPath === path) {
       return;
@@ -169,18 +169,17 @@ export default function ChatHeader({
           </button>
         )}
 
-        <div className="flex flex-col items-center mt-8 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-center mt-8 mb-8">
           <a
             href="/"
             onClick={handleHomeClick}
             className="text-white hover:text-gray-300 transition-colors"
           >
-            <img
-              src="testmate-ai.png"
-              alt="Logo"
-              className="w-30 h-8 rounded-lg object-cover"
-            />
+            <div className="flex items-center gap-4 bg-white bg-opacity-90 border border-white border-opacity-20 rounded-xl p-2 shadow-lg">
+              <img src='7EDGE.png' alt="SET Mate Logo" className="h-5" />
+            </div>
           </a>
+          <h1 className="text-[30px] font-bold p-2">SET Mate</h1>
         </div>
 
         <div className="relative z-50">
@@ -209,27 +208,36 @@ export default function ChatHeader({
             <a
               href="/chat"
               onClick={handleChatClick}
-              className={`text-white hover:text-gray-300 transition-colors ${isOnChatPageCurrent ? 'border-b-2 border-white pb-1' : ''}`}
+              className={`transition-colors px-2 py-1 rounded-md ${isOnChatPageCurrent
+                  ? 'bg-white text-gray-700'
+                  : 'text-white hover:text-gray-300'
+                }`}
             >
               Chat
             </a>
             <a
               href="/profile"
               onClick={handleProfileClick}
-              className={`text-white hover:text-gray-300 transition-colors ${isOnProfilePage ? 'border-b-2 border-white pb-1' : ''}`}
+              className={`transition-colors px-2 py-1 rounded-md ${isOnProfilePage
+                  ? 'bg-white text-gray-700'
+                  : 'text-white hover:text-gray-300'
+                }`}
             >
               Profile
             </a>
             <a
               href="/settings"
               onClick={handleSettingsClick}
-              className={`text-white hover:text-gray-300 transition-colors ${isOnSettingsPage ? 'border-b-2 border-white pb-1' : ''}`}
+              className={`transition-colors px-2 py-1 rounded-md ${isOnSettingsPage
+                  ? 'bg-white text-gray-700'
+                  : 'text-white hover:text-gray-300'
+                }`}
             >
               Settings
             </a>
             <button
               onClick={handleHelpClick}
-              className="text-white hover:text-gray-300 transition-colors"
+              className="text-white hover:text-gray-300 transition-colors px-2 py-1 rounded-md"
             >
               Help
             </button>
