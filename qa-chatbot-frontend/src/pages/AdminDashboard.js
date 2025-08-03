@@ -118,7 +118,7 @@ const AdminDashboard = () => {
       isPageLoaded ? 'opacity-100' : 'opacity-0'
     }`}>
       {/* Header */}
-      <div className="bg-white bg-opacity-10 backdrop-blur-md border-b border-white border-opacity-20 shadow-xl">
+      <div className="sticky top-0 z-50 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 bg-opacity-10 backdrop-blur-md border-b border-white border-opacity-20 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`flex justify-between items-center py-6 transition-all duration-700 ease-out ${
             isPageLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -133,7 +133,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/chat')}
               className="flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
             >
               <MessageSquare className="w-5 h-5" />

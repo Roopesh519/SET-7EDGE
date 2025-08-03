@@ -52,8 +52,9 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
 
   return (
     <div className="p-6 hover:bg-gray-50 transition-all duration-200" style={{ animationDelay: `${index * 0.05}s` }}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* User Info */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-shrink-0">
             <div className="h-12 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
               <span className="text-lg font-bold text-white">
@@ -61,8 +62,9 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
               </span>
             </div>
           </div>
+
           <div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center flex-wrap gap-2">
               <h4 className="text-lg font-semibold text-gray-800">{getSafeUsername(user.username)}</h4>
               {user.isAdmin && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200">
@@ -71,11 +73,13 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-600 flex items-center mt-1">
+
+            <p className="text-sm text-gray-600 flex items-center mt-1 break-all">
               <Mail className="w-4 h-4 mr-2" />
               {user.email || 'No email'}
             </p>
-            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+
+            <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-gray-500">
               <span className="flex items-center">
                 <BarChart3 className="w-3 h-3 mr-1" />
                 Trial: {user.trialPromptsUsed || 0}/5
@@ -87,7 +91,9 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
             </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 justify-start sm:justify-end">
           <button
             onClick={handleEdit}
             className="flex items-center space-x-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 shadow-md hover:shadow-lg"
@@ -95,6 +101,7 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
             <Edit3 className="w-4 h-4" />
             <span>Edit</span>
           </button>
+
           <button
             onClick={handleResetPassword}
             className="flex items-center space-x-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 shadow-md hover:shadow-lg"
@@ -102,6 +109,7 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
             <RefreshCw className="w-4 h-4" />
             <span>Reset</span>
           </button>
+
           <button
             onClick={handleDeleteApiKey}
             className="flex items-center space-x-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 shadow-md hover:shadow-lg"
@@ -109,6 +117,7 @@ const UserCard = ({ user, index, userActions, setEditingUser, setShowUserModal }
             <Key className="w-4 h-4" />
             <span>API</span>
           </button>
+
           <button
             onClick={handleDeleteUser}
             className="flex items-center space-x-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 hover:scale-105 shadow-md hover:shadow-lg"
