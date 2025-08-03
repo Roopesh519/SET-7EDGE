@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage'; // Add this import
 import HomePage from './pages/HomePage';
 import About from './pages/AboutUsPage';
+import AdminDashboard from './pages/AdminDashboard'; // Add this import
 import SessionExpiredModal from './components/modals/SessionExpiredModal'; // Add this import
 
 const App = () => {
@@ -54,6 +55,11 @@ const App = () => {
         <Route
           path="/about"
           element={isLoggedIn ? <About /> : <Navigate to="/login" />}
+        />
+        {/* Add admin route - protected by login and admin check happens in component */}
+        <Route
+          path="/admin"
+          element={isLoggedIn ? <AdminDashboard /> : <Navigate to="/login" />}
         />
         <Route
           path="*"

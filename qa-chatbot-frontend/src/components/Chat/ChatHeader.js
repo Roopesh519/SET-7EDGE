@@ -10,6 +10,7 @@ export default function ChatHeader({
   const mobileMenuRef = useRef();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     function handleOutsideClick(event) {
@@ -26,6 +27,27 @@ export default function ChatHeader({
       document.removeEventListener('touchstart', handleOutsideClick);
     };
   }, [showMobileMenu, setShowMobileMenu]);
+
+  // Check if current user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const userData = await response.json();
+          setIsAdmin(userData.user?.isAdmin || false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, []);
 
   const confirmLogout = () => {
     setShowLogoutModal(true);
@@ -140,6 +162,12 @@ export default function ChatHeader({
     handleNavigation('/settings');
   };
 
+  // Handle admin navigation
+  const handleAdminClick = (e) => {
+    e.preventDefault();
+    handleNavigation('/admin');
+  };
+
   // Handle home navigation
   const handleHomeClick = (e) => {
     e.preventDefault();
@@ -156,6 +184,7 @@ export default function ChatHeader({
   const isOnSettingsPage = currentPath === '/settings';
   const isOnProfilePage = currentPath === '/profile';
   const isOnChatPageCurrent = currentPath === '/chat';
+  const isOnAdminPage = currentPath === '/admin';
 
   return (
     <>
@@ -235,6 +264,20 @@ export default function ChatHeader({
             >
               Settings
             </a>
+            {/* Admin button - only shows for admin users */}
+            {isAdmin && (
+              <a
+                href="/admin"
+                onClick={handleAdminClick}
+                className={`transition-colors px-2 py-1 rounded-md ${isOnAdminPage
+                    ? 'bg-red-500 text-white'
+                    : 'text-red-400 hover:text-red-300 border border-red-400 hover:border-red-300'
+                  }`}
+                title="Admin Dashboard"
+              >
+                Admin
+              </a>
+            )}
             <button
               onClick={handleHelpClick}
               className="text-white hover:text-gray-300 transition-colors px-2 py-1 rounded-md"
@@ -276,6 +319,16 @@ export default function ChatHeader({
               >
                 Settings
               </a>
+              {/* Admin button in mobile menu - only shows for admin users */}
+              {isAdmin && (
+                <a
+                  href="/admin"
+                  onClick={handleAdminClick}
+                  className={`block px-4 py-2 text-red-400 hover:bg-red-900 hover:text-white transition-colors ${isOnAdminPage ? 'bg-red-900 text-white' : ''}`}
+                >
+                  Admin
+                </a>
+              )}
               <button
                 onClick={() => {
                   handleHelpClick();
