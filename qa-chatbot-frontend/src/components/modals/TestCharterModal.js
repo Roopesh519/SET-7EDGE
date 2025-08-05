@@ -107,7 +107,22 @@ OBJECTIVES: ${formData.objectives || 'To be defined'}
 BUGS FOUND: 
 ${bugsFormatted}
 
-Structure: CHARTER – Define the testing objectives and expected behavior. AREAS – Table of testing areas (Functional, UI/UX, Navigation, Security, Error Handling). TESTER – Placeholder for tester's name. TASK BREAKDOWN – Outline key testing tasks. DURATION – Specify session length (Short (30 min) / Long (1 hour)). BUG INVESTIGATION & REPORTING – Time allocated for defect analysis. CHARTER VS. OPPORTUNITY – Ratio of structured vs. exploratory testing (e.g., 90/10). TEST NOTES – Key scenarios covering Feature validation, Security, Navigation, Error Handling, UI/UX. TEST CASES – Table format with columns: Test Case ID Steps Expected Outcome Actual Outcome Status (Pass/Fail) POTENTIAL RISKS – Identify risks and challenges. BUGS – Table format with columns: Bug ID Severity Description Steps to Reproduce Status (Open, In Progress, Resolved) ISSUES & CLARIFICATIONS – List open questions needing resolution. ENHANCEMENTS – Suggest usability, security, or performance improvements. PERSONA(Describe the assumed user persona for this session), Test Execution Notes(Important notes to be added to another tester), Resources (specifying the type of environment we have tested in).`;
+Structure: CHARTER – Define the testing objectives and expected behavior. 
+AREAS – Table of testing areas (Functional, UI/UX, Navigation, Security, Error Handling). 
+TESTER – Placeholder for tester's name. 
+TASK BREAKDOWN – Outline key testing tasks. 
+DURATION – Specify session length (Short (30 min) / Long (1 hour)). 
+BUG INVESTIGATION & REPORTING – Time allocated for defect analysis. 
+CHARTER VS. OPPORTUNITY – Ratio of structured vs. exploratory testing (e.g., 90/10). 
+TEST NOTES – Key scenarios covering Feature validation, Security, Navigation, Error Handling, UI/UX. 
+TEST CASES – Table format with columns: Test Case ID Steps Expected Outcome Actual Outcome Status (Pass/Fail) 
+POTENTIAL RISKS – Identify risks and challenges. 
+BUGS – Table format with columns: Bug ID Severity Description Steps to Reproduce Status (Open, In Progress, Resolved) 
+ISSUES & CLARIFICATIONS – List open questions needing resolution. 
+ENHANCEMENTS – Suggest usability, security, or performance improvements. 
+PERSONA(Describe the assumed user persona for this session), 
+Test Execution Notes(Important notes to be added to another tester), 
+Resources (specifying the type of environment we have tested in).`;
 
         onConfirm(prompt);
         resetForm();
