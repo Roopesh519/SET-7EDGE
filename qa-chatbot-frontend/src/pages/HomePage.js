@@ -224,13 +224,13 @@ export default function HomePage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                         <a
-                            href="mailto:rsroopesh565@gmail.com"
+                            href="mailto:roopesh.yadava@7edge.com"
                             className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 border border-white/20"
                         >
                             Get in Touch
                         </a>
                         <a
-                            href="https://github.com/Roopesh519/testmate-ai/"
+                            href="https://github.com/Roopesh519/SET-7EDGE"
                             className="bg-white hover:bg-gray-100 text-slate-900 px-8 py-4 rounded-lg font-semibold transition-all duration-200"
                         >
                             View on GitHub
