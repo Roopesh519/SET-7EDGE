@@ -22,14 +22,17 @@ export default function HomePage() {
         >
             {/* Header */}
             <header className="w-full bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="w-full px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
+                        {/* Logo section - pushed to left corner */}
                         <div className="flex items-center space-x-3">
                             <div className="flex items-center gap-4 bg-white bg-opacity-90 border border-white border-opacity-20 rounded-xl p-2 shadow-lg">
                                 <img src='7EDGE.png' alt="SET Mate Logo" className="h-8" />
                             </div>
                             <h1 className="text-[40px] font-bold">SET Mate</h1>
                         </div>
+
+                        {/* Navigation menu - pushed to right corner */}
                         <nav className="hidden md:flex items-center space-x-8">
                             <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
                             <a href="#about" className="text-gray-300 hover:text-white transition-colors">About</a>
@@ -241,14 +244,17 @@ export default function HomePage() {
 
             {/* Footer */}
             <footer className="bg-slate-900 border-t border-white/10 py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="w-full px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row justify-between items-center">
+                        {/* Logo section - pushed to left corner */}
                         <div className="flex items-center space-x-3">
                             <div className="flex items-center gap-4 bg-white bg-opacity-90 border border-white border-opacity-20 rounded-xl p-2 shadow-lg">
                                 <img src='7EDGE.png' alt="SET Mate Logo" className="h-5" />
                             </div>
                             <h1 className="text-[20px] font-bold">SET Mate</h1>
                         </div>
+
+                        {/* Copyright - pushed to right corner */}
                         <div className="text-gray-400 text-sm p-2">
                             © 2025 SET Mate. All rights reserved.
                         </div>
