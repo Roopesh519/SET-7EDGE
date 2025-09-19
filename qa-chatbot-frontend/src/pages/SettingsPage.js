@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Key, Save, X, Check, Settings, Shield, Eye, EyeOff } from 'lucide-react';
 import ChatHeader from '../components/Chat/ChatHeader';
 import api from '../utils/api';
+import tokenManager from '../utils/tokenManager';
 
 export default function SettingsPage() {
     const [user, setUser] = useState(null);
@@ -78,7 +79,7 @@ export default function SettingsPage() {
         }
 
         try {
-            const res = await api.put('/settings/api-key', {
+            await api.put('/settings/api-key', {
                 apiKey: apiKey.trim()
             });
 
@@ -116,7 +117,7 @@ export default function SettingsPage() {
     };
 
     const handleLogout = () => {
-        localStorage.clear();
+        tokenManager.clearToken();
         sessionStorage.clear();
         window.location.href = '/login';
     };

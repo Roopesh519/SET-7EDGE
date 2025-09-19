@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { User, Mail, Lock, Edit3, Save, X, Check, Camera, Shield, Settings } from 'lucide-react';
 import ChatHeader from '../components/Chat/ChatHeader';
 import api from '../utils/api';
+import tokenManager from '../utils/tokenManager';
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
@@ -66,7 +67,7 @@ export default function ProfilePage() {
         setIsLoading(true);
 
         try {
-            const res = await api.put('/profile', {
+            await api.put('/profile', {
                 name,
                 password: password || undefined
             });
@@ -95,7 +96,7 @@ export default function ProfilePage() {
     };
 
     const handleLogout = () => {
-        localStorage.clear();
+        tokenManager.clearToken();
         sessionStorage.clear();
         window.location.href = '/login';
     };

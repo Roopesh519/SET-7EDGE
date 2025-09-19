@@ -89,4 +89,60 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// Add refresh token endpoint
+router.post('/refresh', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    // Verify the token (even if expired, we can still decode it)
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      // If token is expired, try to decode without verification
+      if (error.name === 'TokenExpiredError') {
+        decoded = jwt.decode(token);
+      } else {
+        throw error;
+      }
+    }
+
+    if (!decoded) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    // Handle both id and userId from token (for backward compatibility)
+    const userId = decoded.userId || decoded.id;
+    const user = await User.findById(userId).select('-password -togetherApiKey');
+    
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Generate new token
+    const newToken = jwt.sign({ 
+      id: user._id, 
+      userId: user._id
+    }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+    res.json({ 
+      token: newToken,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin || false,
+        trialPromptsUsed: user.trialPromptsUsed || 0
+      }
+    });
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(401).json({ message: 'Token refresh failed' });
+  }
+});
+
 export default router;

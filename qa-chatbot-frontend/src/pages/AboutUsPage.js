@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Spline from '@splinetool/react-spline';
 import ChatHeader from '../components/Chat/ChatHeader';
+import tokenManager from '../utils/tokenManager';
 
 export default function AboutUsPage() {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -23,7 +24,7 @@ export default function AboutUsPage() {
     }, [showMobileMenu]);
 
     const handleLogout = () => {
-        localStorage.clear();
+        tokenManager.clearToken();
         sessionStorage.clear();
         window.location.href = '/login';
     };

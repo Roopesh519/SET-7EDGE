@@ -4,27 +4,35 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Chat from './pages/Chat';
-import ChatPage from './pages/Chat'; // Your chatbot UI
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage'; // Add this import
 import HomePage from './pages/HomePage';
 import About from './pages/AboutUsPage';
 import AdminDashboard from './pages/AdminDashboard'; // Add this import
 import SessionExpiredModal from './components/modals/SessionExpiredModal'; // Add this import
+import SessionStatus from './components/SessionStatus'; // Add this import
+import tokenManager from './utils/tokenManager';
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!tokenManager.getToken());
 
   useEffect(() => {
     // Listen to storage changes from login/logout
     const handleStorageChange = () => {
-      setIsLoggedIn(!!localStorage.getItem('token'));
+      setIsLoggedIn(!!tokenManager.getToken());
+    };
+
+    // Listen to token refresh events
+    const handleTokenRefreshed = () => {
+      setIsLoggedIn(true);
     };
 
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('tokenRefreshed', handleTokenRefreshed);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('tokenRefreshed', handleTokenRefreshed);
     };
   }, []);
 
@@ -69,6 +77,9 @@ const App = () => {
       
       {/* Add the SessionExpiredModal - it will only show when needed */}
       <SessionExpiredModal />
+      
+      {/* Add the SessionStatus - shows session refresh status */}
+      <SessionStatus />
     </Router>
   );
 };

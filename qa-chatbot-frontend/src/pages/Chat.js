@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../utils/api';
+import tokenManager from '../utils/tokenManager';
 import ChatHeader from '../components/Chat/ChatHeader';
 import ChatMessages from '../components/Chat/ChatMessages';
 import ChatInput from '../components/Chat/ChatInput';
@@ -299,13 +300,13 @@ export default function Chat() {
       window.removeEventListener('resize', updateViewportHeight);
       window.removeEventListener('orientationchange', updateViewportHeight);
     };
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (conversations.length > 0 && !activeConversationId) {
       loadConversation(conversations[0]._id);
     }
-  }, [conversations]);
+  }, [conversations, activeConversationId]);
 
   useEffect(() => {
     // Only prevent body scrolling when sidebars are open, not for main chat
@@ -332,7 +333,7 @@ export default function Chat() {
   }, [messages]);
 
   const handleLogout = () => {
-    localStorage.clear();
+    tokenManager.clearToken();
     sessionStorage.clear();
     setMessages([]);
     setInput('');

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import tokenManager from '../utils/tokenManager';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -91,7 +92,7 @@ export default function Login() {
       if (res.ok) {
         const token = data.token;
         if (token) {
-          localStorage.setItem('token', token);
+          tokenManager.setToken(token);
           window.location.href = '/chat';
         } else {
           setError('Authentication failed. No access token received.');
