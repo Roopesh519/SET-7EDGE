@@ -4,6 +4,7 @@ import AcceptanceCriteriaModal from '../modals/AcceptanceCriteriaModal';
 import TestCharterModal from '../modals/TestCharterModal';
 import GherkinModal from '../modals/GherkinModal';
 import StepDefinitionModal from '../modals/StepDefinitionModal';
+import BugReportModal from '../modals/BugReportModal';
 
 export default function ChatInput({ input, setInput, sendMessage, token, activeConversationId, setMessages }) {
   const textareaRef = useRef(null);
@@ -17,6 +18,7 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
   const [showTestCharterModal, setShowTestCharterModal] = useState(false);
   const [showGherkinModal, setShowGherkinModal] = useState(false);
   const [showStepDefinitionModal, setShowStepDefinitionModal] = useState(false);
+  const [showBugReportModal, setShowBugReportModal] = useState(false);
 
   // Automatically resize the textarea
   useEffect(() => {
@@ -131,6 +133,11 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
     setShowStepDefinitionModal(false);
   };
 
+  const handleBugReportConfirm = (prompt) => {
+    setInput(prompt);
+    setShowBugReportModal(false);
+  };
+
   return (
     <div className="border-t border-gray-200 bg-white">
       <div className="max-w-4xl mx-auto px-4 py-4">
@@ -140,7 +147,7 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
           <div className="hidden md:block">
             <div className="overflow-x-auto">
               <div className="flex gap-3 min-w-max">
-                <div className="grid grid-cols-4 gap-2 min-w-max">
+                <div className="grid grid-cols-5 gap-2 min-w-max">
                   <button
                     onClick={() => setShowAcceptanceModal(true)}
                     className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium whitespace-nowrap"
@@ -164,6 +171,12 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
                     className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium whitespace-nowrap"
                   >
                     Step Definitions
+                  </button>
+                  <button
+                    onClick={() => setShowBugReportModal(true)}
+                    className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium whitespace-nowrap"
+                  >
+                    Bug Report
                   </button>
                 </div>
               </div>
@@ -197,6 +210,12 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
                   className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium whitespace-nowrap"
                 >
                   Step Definitions
+                </button>
+                <button
+                  onClick={() => setShowBugReportModal(true)}
+                  className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium whitespace-nowrap"
+                >
+                  Bug Report
                 </button>
               </div>
             </div>
@@ -349,6 +368,12 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
         isOpen={showStepDefinitionModal}
         onClose={() => setShowStepDefinitionModal(false)}
         onConfirm={handleStepDefinitionConfirm}
+      />
+
+      <BugReportModal
+        isOpen={showBugReportModal}
+        onClose={() => setShowBugReportModal(false)}
+        onConfirm={handleBugReportConfirm}
       />
     </div>
   );
