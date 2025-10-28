@@ -15,12 +15,17 @@ const SessionStatus = () => {
       setIsRefreshing(false);
     };
 
+    const handleTokenRefreshCompleted = () => {
+      setIsRefreshing(false);
+    };
+
     const handleSessionExpired = () => {
       setIsRefreshing(false);
     };
 
     window.addEventListener('tokenRefreshing', handleTokenRefreshing);
     window.addEventListener('tokenRefreshed', handleTokenRefreshed);
+    window.addEventListener('tokenRefreshCompleted', handleTokenRefreshCompleted);
     window.addEventListener('sessionExpired', handleSessionExpired);
 
     // Update time until expiry every minute
@@ -35,6 +40,7 @@ const SessionStatus = () => {
     return () => {
       window.removeEventListener('tokenRefreshing', handleTokenRefreshing);
       window.removeEventListener('tokenRefreshed', handleTokenRefreshed);
+      window.removeEventListener('tokenRefreshCompleted', handleTokenRefreshCompleted);
       window.removeEventListener('sessionExpired', handleSessionExpired);
       clearInterval(interval);
     };

@@ -9,15 +9,18 @@ const instance = axios.create({
 instance.interceptors.request.use(async (config) => {
   let token = tokenManager.getToken();
   
-  // Check if token is expired and refresh if needed
-  if (token && tokenManager.isTokenExpired(token)) {
-    try {
-      console.log('Token expired, refreshing before request...');
-      const refreshResult = await tokenManager.refreshToken();
-      token = refreshResult.token;
-    } catch (error) {
-      console.error('Failed to refresh token before request:', error);
-      // Don't block the request, let it proceed and handle 401 in response interceptor
+  // Skip refresh check for the refresh endpoint itself to prevent infinite loops
+  if (config.url !== '/auth/refresh') {
+    // Check if token is expired and refresh if needed
+    if (token && tokenManager.isTokenExpired(token)) {
+      try {
+        console.log('Token expired, refreshing before request...');
+        const refreshResult = await tokenManager.refreshToken();
+        token = refreshResult.token;
+      } catch (error) {
+        console.error('Failed to refresh token before request:', error);
+        // Don't block the request, let it proceed and handle 401 in response interceptor
+      }
     }
   }
   
@@ -33,8 +36,11 @@ instance.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
     
+    // Prevent infinite loops - don't retry if this is already a refresh request
+    const isRefreshRequest = originalRequest.url === '/auth/refresh';
+    
     // Handle 401 errors (token expired)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
       originalRequest._retry = true;
       
       try {
@@ -49,6 +55,8 @@ instance.interceptors.response.use(
         // Dispatch session expired event
         const sessionExpiredEvent = new CustomEvent('sessionExpired');
         window.dispatchEvent(sessionExpiredEvent);
+        // Reject the original error
+        return Promise.reject(error);
       }
     }
     

@@ -83,13 +83,20 @@ class TokenManager {
       const tokenRefreshingEvent = new CustomEvent('tokenRefreshing');
       window.dispatchEvent(tokenRefreshingEvent);
 
-      const response = await api.post('/auth/refresh', {}, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${currentToken}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`
         }
       });
 
-      const { token, user } = response.data;
+      if (!response.ok) {
+        throw new Error(`Refresh failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const { token, user } = data;
       this.setToken(token);
       
       // Dispatch token refreshed event
@@ -108,6 +115,10 @@ class TokenManager {
       window.dispatchEvent(sessionExpiredEvent);
       
       throw error;
+    } finally {
+      // Dispatch token refresh completed event to clear loading state
+      const tokenRefreshCompletedEvent = new CustomEvent('tokenRefreshCompleted');
+      window.dispatchEvent(tokenRefreshCompletedEvent);
     }
   }
 
