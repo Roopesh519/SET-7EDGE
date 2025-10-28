@@ -17,6 +17,7 @@ const TestCharterModal = ({ isOpen, onClose, onConfirm }) => {
             security: true,
             errorHandling: true
         },
+        sessionRecording: '',
         bugs: []
     });
 
@@ -104,6 +105,7 @@ TESTING AREAS: ${selectedAreas}
 TEST ENVIRONMENT: ${formData.environment || 'To be specified'}
 TESTER: ${formData.tester || 'To be assigned'}
 OBJECTIVES: ${formData.objectives || 'To be defined'}
+SESSION RECORDING: ${formData.sessionRecording || 'Not provided'}
 BUGS FOUND: 
 ${bugsFormatted}
 
@@ -145,6 +147,7 @@ Resources (specifying the type of environment we have tested in).`;
                 security: true,
                 errorHandling: true
             },
+            sessionRecording: '',
             bugs: []
         });
     };
@@ -302,18 +305,26 @@ Resources (specifying the type of environment we have tested in).`;
                             </div>
                         </div>
 
+                        {/* Session Recording */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Session Recording
+                            </label>
+                            <textarea
+                                value={formData.sessionRecording}
+                                onChange={(e) => handleInputChange('sessionRecording', e.target.value)}
+                                placeholder="Paste the session recording Link here..."
+                                rows={2}
+                                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+
                         {/* Bugs Section */}
                         <div>
                             <div className="flex items-center justify-between mb-3">
                                 <label className="block text-sm font-medium text-gray-700">
                                     Bugs Found During Testing
                                 </label>
-                                <button
-                                    onClick={addBug}
-                                    className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
-                                >
-                                    + Add Bug
-                                </button>
                             </div>
                             
                             {formData.bugs.length === 0 ? (
@@ -396,6 +407,14 @@ Resources (specifying the type of environment we have tested in).`;
                                     ))}
                                 </div>
                             )}
+                            <div className="flex items-center justify-between mt-3 mb-3">
+                                <button
+                                    onClick={addBug}
+                                    className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                                >
+                                    + Add Bug
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
