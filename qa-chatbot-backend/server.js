@@ -8,7 +8,7 @@ import settingsRoutes from './routes/settings.js';
 dotenv.config(); // ✅ Load env before importing routes
 
 console.log('🔐 JWT_SECRET loaded:', !!process.env.JWT_SECRET);
-console.log('🔑 TOGETHER_API_KEY loaded:', !!process.env.TOGETHER_API_KEY);
+console.log('🔑 HF_TOKEN loaded:', !!process.env.HF_TOKEN);
 console.log('🛢️ MONGO_URI loaded:', !!process.env.MONGO_URI);
 
 import authRoutes from './routes/auth.js';

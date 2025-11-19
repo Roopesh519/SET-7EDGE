@@ -7,7 +7,8 @@ export default function MobileSidebar({
   onSelectConversation,
   onNewChat,
   onUpdateConversationTitle,
-  onDeleteConversation
+  onDeleteConversation,
+  activeConversationId
 }) {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
@@ -84,6 +85,11 @@ export default function MobileSidebar({
     conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleNewChatClick = () => {
+    onNewChat();
+    setShowSidebar(false);
+  };
+
   return (
     <>
       {showSidebar && (
@@ -111,10 +117,7 @@ export default function MobileSidebar({
           <div className="p-4 border-b border-white border-opacity-20">
             <div className="flex justify-between items-center mb-3">
               <button
-                onClick={() => {
-                  onNewChat();
-                  setShowSidebar(false);
-                }}
+                onClick={handleNewChatClick}
                 className="text-sm text-blue-400 hover:underline focus:outline-none"
               >
                 + New Chat
@@ -143,7 +146,11 @@ export default function MobileSidebar({
                   >
                     <div
                       onClick={() => handleSelect(conv._id)}
-                      className="p-3 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors cursor-pointer"
+                      className={`p-3 rounded-lg transition-colors cursor-pointer ${
+                        activeConversationId === conv._id
+                          ? 'bg-blue-600 bg-opacity-30 border border-blue-400 border-opacity-50'
+                          : 'bg-white bg-opacity-10 hover:bg-opacity-20'
+                      }`}
                     >
                       {editingId === conv._id ? (
                         <div className="flex items-center gap-2">

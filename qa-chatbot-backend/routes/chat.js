@@ -1,7 +1,7 @@
 import express from 'express';
 import ChatHistory from '../models/ChatHistory.js';
 import authMiddleware from '../middleware/authMiddleware.js';
-import Together from 'together-ai';
+import OpenAI from 'openai';
 import Conversation from '../models/Conversation.js';
 import User from '../models/User.js'; // Import User model
 import multer from 'multer';
@@ -14,28 +14,31 @@ import { getUserApiKey } from './settings.js';
 const router = express.Router();
 
 const TRIAL_LIMIT = 5;
+const CONVERSATION_MESSAGE_LIMIT = 50; // Maximum number of message pairs (user + assistant) per conversation
 
-let together = null;
+let huggingFaceClient = null;
 
 // Initialize default system client
 function initializeSystemClient() {
-  if (!together) {
-    if (!process.env.TOGETHER_API_KEY) {
-      console.warn('⚠️ TOGETHER_API_KEY is missing from env!');
+  if (!huggingFaceClient) {
+    if (!process.env.HF_TOKEN) {
+      console.warn('⚠️ HF_TOKEN is missing from env!');
       return null;
     }
-    together = new Together({
-      apiKey: process.env.TOGETHER_API_KEY
+    huggingFaceClient = new OpenAI({
+      baseURL: 'https://router.huggingface.co/v1',
+      apiKey: process.env.HF_TOKEN
     });
-    console.log('🧠 Together system client initialized');
+    console.log('🧠 Hugging Face system client initialized');
   }
-  return together;
+  return huggingFaceClient;
 }
 
-async function getTogetherClient(userId, apiKey = null) {
+async function getHuggingFaceClient(userId, apiKey = null) {
   // If user has their own API key, create a new instance with it
   if (apiKey) {
-    return new Together({
+    return new OpenAI({
+      baseURL: 'https://router.huggingface.co/v1',
       apiKey: apiKey
     });
   }
@@ -87,7 +90,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     // Get user's API key if they have one
     const userApiKey = await getUserApiKey(userId);
-    const client = await getTogetherClient(userId, userApiKey);
+    const client = await getHuggingFaceClient(userId, userApiKey);
 
     // Add a system prompt at the top, always
     const messagesWithSystem = [
@@ -114,6 +117,13 @@ router.post('/', authMiddleware, async (req, res) => {
     if (conversationId) {
       conversation = await Conversation.findById(conversationId);
       if (conversation) {
+        // Check if conversation has reached message limit
+        if (conversation.messages.length >= CONVERSATION_MESSAGE_LIMIT) {
+          return res.status(400).json({ 
+            error: `Conversation limit reached. Maximum ${CONVERSATION_MESSAGE_LIMIT} message pairs allowed per conversation. Please start a new conversation.`,
+            code: 'CONVERSATION_LIMIT_REACHED'
+          });
+        }
         conversation.messages.push({ prompt: userMessage, response: reply });
         await conversation.save();
       }
@@ -144,7 +154,7 @@ router.post('/', authMiddleware, async (req, res) => {
     // Handle trial exhausted error
     if (err.message === 'TRIAL_EXHAUSTED') {
       return res.status(403).json({ 
-        error: 'Trial limit reached. Please add your own Together.ai API key in settings to continue.',
+        error: 'Trial limit reached. Please add your own Hugging Face API key in settings to continue.',
         code: 'TRIAL_EXHAUSTED'
       });
     }
@@ -152,14 +162,14 @@ router.post('/', authMiddleware, async (req, res) => {
     // Handle API key related errors
     if (err.message.includes('401') || err.message.includes('Unauthorized')) {
       return res.status(401).json({ 
-        error: 'Invalid API key. Please check your Together.ai API key in settings.',
+        error: 'Invalid API key. Please check your Hugging Face API key in settings.',
         code: 'INVALID_API_KEY'
       });
     }
     
     if (err.message.includes('quota') || err.message.includes('limit')) {
       return res.status(429).json({ 
-        error: 'API quota exceeded. Please check your Together.ai account.',
+        error: 'API quota exceeded. Please check your Hugging Face account.',
         code: 'QUOTA_EXCEEDED'
       });
     }
@@ -309,9 +319,9 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       return res.status(400).json({ error: 'No text found in file' });
     }
 
-    // 🤖 Ask Together AI about the extracted content using user's API key if available
+    // 🤖 Ask Hugging Face about the extracted content using user's API key if available
     const userApiKey = await getUserApiKey(userId);
-    const client = await getTogetherClient(userId, userApiKey);
+    const client = await getHuggingFaceClient(userId, userApiKey);
     
     const messages = [
       { role: 'system', content: 'You are a helpful assistant. Answer based on the file content provided.' },
@@ -362,7 +372,7 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
     // Handle trial exhausted error
     if (err.message === 'TRIAL_EXHAUSTED') {
       return res.status(403).json({ 
-        error: 'Trial limit reached. Please add your own Together.ai API key in settings to continue.',
+        error: 'Trial limit reached. Please add your own Hugging Face API key in settings to continue.',
         code: 'TRIAL_EXHAUSTED'
       });
     }
@@ -370,7 +380,7 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
     // Handle API key related errors for file upload too
     if (err.message.includes('401') || err.message.includes('Unauthorized')) {
       return res.status(401).json({ 
-        error: 'Invalid API key. Please check your Together.ai API key in settings.',
+        error: 'Invalid API key. Please check your Hugging Face API key in settings.',
         code: 'INVALID_API_KEY'
       });
     }

@@ -30,7 +30,7 @@ const ApiKeyModal = ({ isOpen, onClose, onNavigateToSettings }) => {
               <Key className="w-8 h-8 text-indigo-500" />
             </div>
             <p className="text-gray-600 mb-2 leading-relaxed">
-              To start chatting, you need to configure your Together.ai API key in settings.
+              To start chatting, you need to configure your Hugging Face API key in settings.
             </p>
             <p className="text-sm text-gray-500">
               This ensures you have access to the AI models and can enjoy unlimited conversations.
@@ -71,12 +71,12 @@ const ApiKeyModal = ({ isOpen, onClose, onNavigateToSettings }) => {
             
             <div className="text-center">
               <a
-                href="https://api.together.ai/"
+                href="https://huggingface.co/settings/tokens"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-1 text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
               >
-                <span>Get your API key from Together.ai</span>
+                <span>Get your API key from Hugging Face</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>

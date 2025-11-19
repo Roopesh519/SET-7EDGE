@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Sidebar({ conversations, onSelectConversation, onNewChat, onUpdateConversationTitle, onDeleteConversation }) {
+export default function Sidebar({ conversations, onSelectConversation, onNewChat, onUpdateConversationTitle, onDeleteConversation, activeConversationId }) {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,6 +56,8 @@ export default function Sidebar({ conversations, onSelectConversation, onNewChat
     conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // No need for handleNewChatClick - just use onNewChat directly
+
   return (
     <>
       <aside className="hidden md:block w-80 bg-gray-900 bg-opacity-95 backdrop-blur-md border-r border-white border-opacity-20">
@@ -88,7 +90,11 @@ export default function Sidebar({ conversations, onSelectConversation, onNewChat
                   <li key={conv._id} className="group relative">
                     <div
                       onClick={() => !editingId && onSelectConversation(conv._id)}
-                      className="p-3 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors cursor-pointer"
+                      className={`p-3 rounded-lg transition-colors cursor-pointer ${
+                        activeConversationId === conv._id
+                          ? 'bg-blue-600 bg-opacity-30 border border-blue-400 border-opacity-50'
+                          : 'bg-white bg-opacity-10 hover:bg-opacity-20'
+                      }`}
                     >
                       {editingId === conv._id ? (
                         <div className="flex items-center gap-2">

@@ -6,7 +6,8 @@ import ChatMessages from '../components/Chat/ChatMessages';
 import ChatInput from '../components/Chat/ChatInput';
 import Sidebar from '../components/Chat/Sidebar';
 import MobileSidebar from '../components/Chat/MobileSidebar';
-import ApiKeyModal from '../components/modals/ApiKeyModal'; // Import the modal
+import ApiKeyModal from '../components/modals/ApiKeyModal';
+import MessageLimitModal from '../components/modals/MessageLimitModal';
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
@@ -16,8 +17,10 @@ export default function Chat() {
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const hasInitiallyLoaded = useRef(false);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(null); // null = loading, true/false = result
   const [trialStatus, setTrialStatus] = useState({
     hasApiKey: null,
@@ -30,6 +33,7 @@ export default function Chat() {
   const messagesContainerRef = useRef();
   const token = localStorage.getItem('token');
   const TRIAL_LIMIT = 5;
+  const CONVERSATION_MESSAGE_LIMIT = 50; // Maximum number of message pairs (user + assistant) per conversation
 
   const checkApiKeyStatus = async () => {
     try {
@@ -73,11 +77,24 @@ export default function Chat() {
 
   const loadConversation = async (conversationId) => {
     try {
-      const res = await api.get(`/chat/conversations/${conversationId}`);
-      setMessages(res.data.messages);
+      // Always set activeConversationId first to update UI immediately
       setActiveConversationId(conversationId);
+      
+      // Add timestamp query parameter to bypass cache and ensure fresh data
+      const timestamp = new Date().getTime();
+      const res = await api.get(`/chat/conversations/${conversationId}?t=${timestamp}`);
+      const loadedMessages = res.data.messages || [];
+      setMessages(loadedMessages);
+      
+      // Check if loaded conversation is at limit
+      if (loadedMessages.length >= CONVERSATION_MESSAGE_LIMIT * 2) {
+        // Don't show modal immediately, but user will see it when trying to send
+      }
     } catch (err) {
       console.error('Failed to load conversation:', err);
+      // Reset on error
+      setActiveConversationId(null);
+      setMessages([]);
     }
   };
 
@@ -133,6 +150,12 @@ export default function Chat() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
+    // Check if conversation has reached message limit
+    if (messages.length >= CONVERSATION_MESSAGE_LIMIT * 2) {
+      setShowLimitModal(true);
+      return;
+    }
 
     // Check trial status before sending message
     const currentTrialStatus = trialStatus.hasApiKey !== null ? trialStatus : await checkTrialStatus();
@@ -196,6 +219,14 @@ export default function Chat() {
         const errorMessage = err.response.data?.error || '';
         const errorCode = err.response.data?.code;
         const statusCode = err.response.status;
+        
+        // Handle conversation limit reached error
+        if (errorCode === 'CONVERSATION_LIMIT_REACHED' || statusCode === 400) {
+          if (errorMessage.toLowerCase().includes('conversation limit') || errorMessage.toLowerCase().includes('limit reached')) {
+            setShowLimitModal(true);
+            return;
+          }
+        }
         
         // Handle trial exhausted error
         if (errorCode === 'TRIAL_EXHAUSTED' || statusCode === 403) {
@@ -303,7 +334,9 @@ export default function Chat() {
   }, [token]);
 
   useEffect(() => {
-    if (conversations.length > 0 && !activeConversationId) {
+    // Only auto-load the first conversation on initial load, not when user explicitly creates new chat
+    if (conversations.length > 0 && !activeConversationId && !hasInitiallyLoaded.current) {
+      hasInitiallyLoaded.current = true;
       loadConversation(conversations[0]._id);
     }
   }, [conversations, activeConversationId]);
@@ -346,6 +379,8 @@ export default function Chat() {
     setMessages([]);
     setActiveConversationId(null);
     setInput('');
+    // Mark that we've initially loaded so useEffect doesn't auto-load a conversation
+    hasInitiallyLoaded.current = true;
   };
 
   // Determine what banner to show
@@ -385,7 +420,7 @@ export default function Chat() {
           <div className="flex items-center space-x-2 text-sm">
             <div className="w-4 h-4 bg-orange-400 rounded-full flex-shrink-0"></div>
             <span className="text-orange-800">
-              <strong>API Key Required:</strong> Configure your Together.ai API key in{' '}
+              <strong>API Key Required:</strong> Configure your Hugging Face API key in{' '}
               <button 
                 onClick={() => setShowApiKeyModal(true)}
                 className="underline hover:no-underline font-medium"
@@ -428,12 +463,21 @@ export default function Chat() {
         onNavigateToSettings={handleNavigateToSettings}
       />
 
+      {/* Message Limit Modal */}
+      <MessageLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        onNewChat={handleNewChat}
+        messageLimit={CONVERSATION_MESSAGE_LIMIT}
+      />
+
       <Sidebar
         conversations={conversations}
         onSelectConversation={loadConversation}
         onNewChat={handleNewChat}
         onUpdateConversationTitle={handleUpdateConversationTitle}
         onDeleteConversation={handleDeleteConversation}
+        activeConversationId={activeConversationId}
       />
       <MobileSidebar
         conversations={conversations}
@@ -443,6 +487,7 @@ export default function Chat() {
         onNewChat={handleNewChat}
         onUpdateConversationTitle={handleUpdateConversationTitle}
         onDeleteConversation={handleDeleteConversation}
+        activeConversationId={activeConversationId}
       />
       
       <div className="flex flex-col flex-1 h-full">
@@ -495,8 +540,28 @@ export default function Chat() {
                 token={token}
                 activeConversationId={activeConversationId}
                 setMessages={setMessages}
-                disabled={!trialStatus.hasApiKey && trialStatus.remainingTrialPrompts <= 0}
+                disabled={
+                  (!trialStatus.hasApiKey && trialStatus.remainingTrialPrompts <= 0) ||
+                  (messages.length >= CONVERSATION_MESSAGE_LIMIT * 2)
+                }
               />
+              {/* Show warning when approaching limit */}
+              {messages.length >= CONVERSATION_MESSAGE_LIMIT * 2 - 4 && messages.length < CONVERSATION_MESSAGE_LIMIT * 2 && (
+                <div className="px-4 py-2 bg-orange-50 border-t border-orange-200">
+                  <p className="text-sm text-orange-700">
+                    ⚠️ You're approaching the conversation limit ({Math.ceil((CONVERSATION_MESSAGE_LIMIT * 2 - messages.length) / 2)} message pairs remaining). 
+                    Consider starting a new chat soon.
+                  </p>
+                </div>
+              )}
+              {/* Show limit reached message */}
+              {messages.length >= CONVERSATION_MESSAGE_LIMIT * 2 && (
+                <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+                  <p className="text-sm text-red-700 font-medium">
+                    ⛔ Conversation limit reached. Please start a new chat to continue.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </main>

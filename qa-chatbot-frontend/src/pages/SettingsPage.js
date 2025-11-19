@@ -71,9 +71,9 @@ export default function SettingsPage() {
             return;
         }
 
-        // Basic validation for Together.ai API key format
+        // Basic validation for Hugging Face API key format
         if (!apiKey.startsWith('') && !apiKey.includes('')) {
-            setError('Please enter a valid Together.ai API key');
+            setError('Please enter a valid Hugging Face API key');
             setIsLoading(false);
             return;
         }
@@ -190,7 +190,7 @@ export default function SettingsPage() {
                                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
                                         <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
                                             <Key className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-indigo-500" />
-                                            <span className="text-sm sm:text-base">Together.ai API Key</span>
+                                            <span className="text-sm sm:text-base">Hugging Face API Key</span>
                                         </h3>
                                         <div className="flex items-center space-x-2 self-start sm:self-auto">
                                             {hasApiKey && (
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                                             <div>
                                                 <label className="block font-medium mb-2 text-gray-700 flex items-center text-sm sm:text-base">
                                                     <Key className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-gray-700" />
-                                                    Together.ai API Key
+                                                    Hugging Face API Key
                                                 </label>
                                                 <div className="relative">
                                                     <input
@@ -248,7 +248,7 @@ export default function SettingsPage() {
                                                     </button>
                                                 </div>
                                                 <p className="text-xs sm:text-sm text-gray-500 mt-2">
-                                                    Get your API key from <a href="https://api.together.ai/" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">Together.ai Dashboard</a>
+                                                    Get your API key from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">Hugging Face Dashboard</a>
                                                 </p>
                                             </div>
 
@@ -298,7 +298,7 @@ export default function SettingsPage() {
                                                 <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
                                             </div>
                                             <p className="text-gray-600 mb-2 text-sm sm:text-base">Personal API key is active</p>
-                                            <p className="text-xs sm:text-sm text-gray-500 px-4">Your requests are using your personal Together.ai API key</p>
+                                            <p className="text-xs sm:text-sm text-gray-500 px-4">Your requests are using your personal Hugging Face API key</p>
                                         </div>
                                     )}
 

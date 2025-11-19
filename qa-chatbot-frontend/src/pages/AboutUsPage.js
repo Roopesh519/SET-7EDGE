@@ -175,7 +175,7 @@ export default function AboutUsPage() {
                                         <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">Node.js</span>
                                         <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">AI/ML</span>
                                         <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">MongoDB</span>
-                                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">together.ai</span>
+                                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">Hugging Face</span>
                                         <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">Deepseek</span>
                                         <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">Spline</span>
                                     </div>

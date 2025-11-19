@@ -109,15 +109,15 @@ router.put('/api-key', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'API key is required' });
         }
 
-        // Basic validation for Together.ai API key
+        // Basic validation for Hugging Face API key
         const trimmedKey = apiKey.trim();
         if (trimmedKey.length < 10) {
             return res.status(400).json({ error: 'Invalid API key format' });
         }
 
-        // Test the API key by making a simple request
+        // Test the API key by making a simple request to Hugging Face
         try {
-            const testResponse = await fetch('https://api.together.ai/v1/models', {
+            const testResponse = await fetch('https://router.huggingface.co/v1/models', {
                 headers: {
                     'Authorization': `Bearer ${trimmedKey}`,
                     'Content-Type': 'application/json'
@@ -125,7 +125,7 @@ router.put('/api-key', authMiddleware, async (req, res) => {
             });
 
             if (!testResponse.ok) {
-                return res.status(400).json({ error: 'Invalid API key. Please check your Together.ai API key.' });
+                return res.status(400).json({ error: 'Invalid API key. Please check your Hugging Face API key.' });
             }
         } catch (testError) {
             console.error('❌ API key validation error:', testError);
