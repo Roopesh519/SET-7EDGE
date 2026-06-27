@@ -72,6 +72,41 @@ async function incrementTrialUsage(userId) {
   );
 }
 
+async function generateConversationTitle(client, userMessage, assistantReply) {
+  try {
+    const titlePrompt = `Create a short descriptive title for this QA support conversation. Keep it under 8 words and return only the title without extra punctuation.\n\nUser: ${userMessage}\nAssistant: ${assistantReply}`;
+
+    const response = await client.chat.completions.create({
+      model: 'deepseek-ai/DeepSeek-V3',
+      temperature: 0.3,
+      max_tokens: 16,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a concise title generator for support conversations. Output only the title.'
+        },
+        {
+          role: 'user',
+          content: titlePrompt
+        }
+      ]
+    });
+
+    const generatedTitle = response.choices?.[0]?.message?.content?.trim();
+    if (!generatedTitle) return null;
+
+    const cleanTitle = generatedTitle
+      .replace(/^["'\s]+|["'\s]+$/g, '')
+      .replace(/\s+/g, ' ')
+      .slice(0, 60);
+
+    return cleanTitle;
+  } catch (err) {
+    console.error('⚠️ Title generation failed:', err.message || err);
+    return null;
+  }
+}
+
 // POST message to existing conversation or create a new one
 router.post('/', authMiddleware, async (req, res) => {
   const userId = req.user?.id;
@@ -131,9 +166,10 @@ router.post('/', authMiddleware, async (req, res) => {
 
     // If no conversation or invalid ID, create new
     if (!conversation) {
+      const generatedTitle = await generateConversationTitle(client, userMessage, reply);
       conversation = new Conversation({
         userId,
-        title: userMessage.slice(0, 30),
+        title: generatedTitle || userMessage.slice(0, 30),
         messages: [{ prompt: userMessage, response: reply }]
       });
       await conversation.save();
@@ -283,12 +319,18 @@ router.patch('/conversations/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Ensure uploads directory exists
+const uploadsDir = path.resolve('uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // 🗂️ Set up multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
 });
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // 📎 POST /chat/upload — Upload file and ask about it
 router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
@@ -298,24 +340,37 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
 
   if (!file) return res.status(400).json({ error: 'No file uploaded' });
 
+  const cleanupFile = (filePath) => {
+    fs.unlink(filePath, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error('⚠️ Failed to remove temp upload:', unlinkErr);
+      }
+    });
+  };
+
+  const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
   let extractedText = '';
   const ext = path.extname(file.originalname).toLowerCase();
 
   try {
+    if (!allowedExtensions.includes(ext)) {
+      cleanupFile(file.path);
+      return res.status(400).json({ error: 'Unsupported file type. Please upload a PDF, JPG, or PNG.' });
+    }
+
     // 🧠 Extract text based on file type
     if (ext === '.pdf') {
       const pdfParse = (await import('pdf-parse')).default;
       const dataBuffer = fs.readFileSync(file.path);
       const pdfData = await pdfParse(dataBuffer);
       extractedText = pdfData.text;
-    } else if (['.jpg', '.jpeg', '.png'].includes(ext)) {
+    } else {
       const ocrResult = await Tesseract.recognize(file.path, 'eng');
       extractedText = ocrResult.data.text;
-    } else {
-      return res.status(400).json({ error: 'Unsupported file type' });
     }
 
     if (!extractedText.trim()) {
+      cleanupFile(file.path);
       return res.status(400).json({ error: 'No text found in file' });
     }
 
@@ -344,30 +399,45 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       await incrementTrialUsage(userId);
     }
 
-    // 💾 Save to conversation if exists
+    // 💾 Save to conversation if exists or create a new one
     let conversation;
     if (conversationId) {
       conversation = await Conversation.findById(conversationId);
-      if (conversation) {
-        conversation.messages.push({
+    }
+
+    if (conversation) {
+      conversation.messages.push({
+        prompt: `📎 Uploaded: ${file.originalname}${followupQuestion ? `\n❓ ${followupQuestion}` : ''}`,
+        response: reply
+      });
+      await conversation.save();
+    } else {
+      const generatedTitle = await generateConversationTitle(client, `Uploaded file: ${file.originalname}`, reply);
+      conversation = new Conversation({
+        userId,
+        title: generatedTitle || file.originalname,
+        messages: [{
           prompt: `📎 Uploaded: ${file.originalname}${followupQuestion ? `\n❓ ${followupQuestion}` : ''}`,
           response: reply
-        });
-        await conversation.save();
-      }
+        }]
+      });
+      await conversation.save();
     }
 
     // Get updated user info to send remaining trial count
     const updatedUser = await User.findById(userId);
-    const remainingTrialPrompts = userApiKey ? null : Math.max(0, 3 - updatedUser.trialPromptsUsed);
+    const remainingTrialPrompts = userApiKey ? null : Math.max(0, TRIAL_LIMIT - updatedUser.trialPromptsUsed);
 
+    cleanupFile(file.path);
     res.json({ 
       reply, 
       fileName: file.originalname,
+      conversationId: conversation._id,
       remainingTrialPrompts
     });
   } catch (err) {
     console.error('❌ File processing error:', err.message || err);
+    cleanupFile(file.path);
     
     // Handle trial exhausted error
     if (err.message === 'TRIAL_EXHAUSTED') {

@@ -6,7 +6,7 @@ import GherkinModal from '../modals/GherkinModal';
 import StepDefinitionModal from '../modals/StepDefinitionModal';
 import BugReportModal from '../modals/BugReportModal';
 
-export default function ChatInput({ input, setInput, sendMessage, token, activeConversationId, setMessages }) {
+export default function ChatInput({ input, setInput, sendMessage, token, activeConversationId, setActiveConversationId, setMessages }) {
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -35,6 +35,13 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Unsupported file type. Please upload a PDF, JPG, or PNG file.');
+        e.target.value = '';
+        return;
+      }
+
       // Check file size (limit to 10MB)
       if (file.size > 10 * 1024 * 1024) {
         alert('File size must be less than 10MB');
@@ -66,13 +73,17 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/chat/upload`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+          Authorization: `Bearer ${token}`
         }
       });
 
       const reply = res.data.reply;
       const fileName = selectedFile.name;
+      const newConversationId = res.data.conversationId;
+
+      if (newConversationId && newConversationId !== activeConversationId) {
+        setActiveConversationId(newConversationId);
+      }
 
       setMessages(prev => [
         ...prev,
@@ -287,7 +298,7 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
             </div>
             {/* Helper Text */}
             <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-              <span>This feature is still in progress.</span>
+              <span>Supported files: PDF, JPG, PNG.</span>
               <span>Max file size: 10MB</span>
             </div>
           </div>
@@ -302,7 +313,7 @@ export default function ChatInput({ input, setInput, sendMessage, token, activeC
               type="file"
               onChange={handleFileUpload}
               className="hidden"
-              accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.csv,.xlsx,.xls"
+              accept=".pdf,.jpg,.jpeg,.png"
             />
             <button
               onClick={() => fileInputRef.current?.click()}

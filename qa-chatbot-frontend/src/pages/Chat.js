@@ -537,6 +537,7 @@ export default function Chat() {
                 sendMessage={sendMessage}
                 token={token}
                 activeConversationId={activeConversationId}
+                setActiveConversationId={setActiveConversationId}
                 setMessages={setMessages}
                 disabled={
                   (!trialStatus.hasApiKey && trialStatus.remainingTrialPrompts <= 0) ||
