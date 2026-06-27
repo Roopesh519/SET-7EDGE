@@ -71,15 +71,31 @@ app.use('/api/admin', adminRoutes);
 
 app.use(errorHandler);
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('✅ MongoDB connected');
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 The Server is running on http://0.0.0.0:${PORT}`);
-    });    
-  })
-  .catch((err) => {
+const connectToMongo = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log('✅ MongoDB connected');
+};
+
+const isVercel = Boolean(process.env.VERCEL);
+
+if (isVercel) {
+  connectToMongo().catch((err) => {
     console.error('❌ MongoDB connection error:', err);
   });
+} else {
+  connectToMongo()
+    .then(() => {
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 The Server is running on http://0.0.0.0:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error('❌ MongoDB connection error:', err);
+    });
+}
 
-
+export default app;
