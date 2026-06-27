@@ -27,8 +27,25 @@ const PORT = process.env.PORT || 5000;
 
 app.set('trust proxy', 1);
 app.use(helmet());
+
+const allowedOrigins = process.env.FRONTEND_ORIGIN
+  ? process.env.FRONTEND_ORIGIN.split(',').map(origin => origin.trim()).filter(Boolean)
+  : ['http://localhost:3000'];
+
 app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN?.split(',') || ['http://localhost:3000'],
+  origin: (origin, callback) => {
+    if (!origin) {
+      // Allow non-browser requests like Postman or server-to-server calls
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`Blocked CORS origin: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}`);
+    callback(new Error(`Origin ${origin} is not allowed by CORS`));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10kb' }));
