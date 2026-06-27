@@ -6,6 +6,7 @@ import Conversation from '../models/Conversation.js';
 import User from '../models/User.js'; // Import User model
 import multer from 'multer';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 // import pdfParse from 'pdf-parse';
 import Tesseract from 'tesseract.js';
@@ -319,8 +320,8 @@ router.patch('/conversations/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Ensure uploads directory exists
-const uploadsDir = path.resolve('uploads');
+// Ensure uploads directory exists in a writable temp location
+const uploadsDir = path.resolve(os.tmpdir(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
