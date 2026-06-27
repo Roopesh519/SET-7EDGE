@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Key, Save, X, Check, Settings, Shield, Eye, EyeOff } from 'lucide-react';
 import ChatHeader from '../components/Chat/ChatHeader';
 import api from '../utils/api';
-import tokenManager from '../utils/tokenManager';
 
 export default function SettingsPage() {
+    const navigate = useNavigate();
+    const { isAuthenticated, loading, logout } = useAuth();
     const [user, setUser] = useState(null);
     const [apiKey, setApiKey] = useState('');
     const [showApiKey, setShowApiKey] = useState(false);
@@ -23,10 +26,8 @@ export default function SettingsPage() {
             overlay.remove();
         }
 
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('You must be logged in to access settings.');
-            window.location.href = '/login';
+        if (!isAuthenticated && !loading) {
+            navigate('/login');
             return;
         }
 
@@ -54,7 +55,7 @@ export default function SettingsPage() {
         setViewportHeight();
         window.addEventListener('resize', setViewportHeight);
         return () => window.removeEventListener('resize', setViewportHeight);
-    }, []);
+    }, [isAuthenticated, loading, navigate]);
 
     useEffect(() => {
         document.body.style.overflow = showMobileMenu ? 'hidden' : '';
@@ -117,9 +118,7 @@ export default function SettingsPage() {
     };
 
     const handleLogout = () => {
-        tokenManager.clearToken();
-        sessionStorage.clear();
-        window.location.href = '/login';
+        logout();
     };
 
     if (!user) {

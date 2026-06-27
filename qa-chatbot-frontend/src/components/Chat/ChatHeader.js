@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ChatHeader({
   setShowSidebar,
@@ -10,7 +12,9 @@ export default function ChatHeader({
   const mobileMenuRef = useRef();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.isAdmin);
+  const navigate = useNavigate();
 
   useEffect(() => {
     function handleOutsideClick(event) {
@@ -27,27 +31,6 @@ export default function ChatHeader({
       document.removeEventListener('touchstart', handleOutsideClick);
     };
   }, [showMobileMenu, setShowMobileMenu]);
-
-  // Check if current user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const response = await fetch('/api/auth/me', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          const userData = await response.json();
-          setIsAdmin(userData.user?.isAdmin || false);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, []);
 
   const confirmLogout = () => {
     setShowLogoutModal(true);
@@ -165,7 +148,11 @@ export default function ChatHeader({
   // Handle admin navigation
   const handleAdminClick = (e) => {
     e.preventDefault();
-    handleNavigation('/admin');
+    if (user?.isAdmin) {
+      handleNavigation('/admin');
+    } else {
+      navigate('/chat');
+    }
   };
 
   // Handle home navigation

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
-import tokenManager from '../utils/tokenManager';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -63,56 +64,26 @@ export default function Login() {
     }
   };
 
+  const { login: loginUser } = useAuth();
+  const navigate = useNavigate();
+
   const login = async () => {
-    // Clear previous errors
     setError('');
 
-    // Validate inputs
     if (!validateInputs()) {
       return;
     }
 
     try {
       setLoading(true);
-
-      const res = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: email.trim(), password }),
-        }
-      );
-
-      const data = await res.json();
-
-      // Check if request was successful
-      if (res.ok) {
-        const token = data.token;
-        if (token) {
-          tokenManager.setToken(token);
-          window.location.href = '/chat';
-        } else {
-          setError('Authentication failed. No access token received.');
-        }
-      } else {
-        // Handle HTTP error responses
-        const errorMessage = getErrorMessage(data, res.status);
-        setError(errorMessage);
-      }
+      await loginUser({ email: email.trim(), password });
+      navigate('/chat');
     } catch (err) {
       console.error('Login error:', err);
-
-      // Handle network errors
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Network error. Please check your internet connection.');
-      } else if (err.name === 'SyntaxError') {
-        setError('Server response error. Please try again.');
-      } else {
-        setError(err.message || 'An unexpected error occurred. Please try again.');
-      }
+      const status = err.response?.status;
+      const payload = err.response?.data;
+      const errorMessage = payload?.error || payload?.message || getErrorMessage(payload, status);
+      setError(errorMessage || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -126,7 +97,7 @@ export default function Login() {
   };
 
   const navigateToRegister = () => {
-    window.location.href = `/register?redirection_url=670f66759a11f41aa6daee68`;
+    navigate('/register');
   };
 
   return (

@@ -3,47 +3,52 @@ import User from '../models/User.js';
 
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  console.log('🔐 Token:', token);
-  if (!token) return res.status(401).json({ error: 'Access denied' });
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied', code: 'AUTH_REQUIRED' });
+  }
 
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    req.user = {
+      id: verified.userId || verified.id,
+      email: verified.email
+    };
     next();
   } catch (err) {
-    res.status(400).json({ error: 'Invalid token' });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
+    }
+    return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
   }
 };
 
-// admin middleware 
 const adminMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  console.log('🔐 Admin Token:', token);
-  
   if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({ error: 'No token provided', code: 'AUTH_REQUIRED' });
   }
 
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(verified.userId).select('-password -togetherApiKey');
-    
+    const user = await User.findById(verified.userId || verified.id).select('-password -togetherApiKey');
+
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return res.status(401).json({ error: 'User not found', code: 'USER_NOT_FOUND' });
     }
 
     if (!user.isAdmin) {
-      return res.status(403).json({ message: 'Admin access required' });
+      return res.status(403).json({ error: 'Admin access required', code: 'ADMIN_REQUIRED' });
     }
 
     req.user = user;
     next();
   } catch (error) {
-    console.error('Admin middleware error:', error);
-    res.status(401).json({ message: 'Invalid token' });
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
+    }
+    return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
   }
 };
 
-// Export both middlewares
 export default authMiddleware;
 export { adminMiddleware };

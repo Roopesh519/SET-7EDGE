@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Spline from '@splinetool/react-spline';
 import ChatHeader from '../components/Chat/ChatHeader';
-import tokenManager from '../utils/tokenManager';
 
 export default function AboutUsPage() {
+    const navigate = useNavigate();
+    const { isAuthenticated, loading, logout } = useAuth();
     const [showMobileMenu, setShowMobileMenu] = useState(false);
 
     useEffect(() => {
+        if (!isAuthenticated && !loading) {
+            navigate('/login');
+            return;
+        }
+
         // Set viewport height for mobile compatibility
         const setViewportHeight = () => {
             const vh = window.innerHeight * 0.01;
@@ -16,7 +24,7 @@ export default function AboutUsPage() {
         setViewportHeight();
         window.addEventListener('resize', setViewportHeight);
         return () => window.removeEventListener('resize', setViewportHeight);
-    }, []);
+    }, [isAuthenticated, loading, navigate]);
 
     // Prevent background scroll when mobile menu is open
     useEffect(() => {
@@ -24,9 +32,7 @@ export default function AboutUsPage() {
     }, [showMobileMenu]);
 
     const handleLogout = () => {
-        tokenManager.clearToken();
-        sessionStorage.clear();
-        window.location.href = '/login';
+        logout();
     };
 
     return (

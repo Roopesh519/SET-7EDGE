@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Lock, Edit3, Save, X, Check, Camera, Shield, Settings } from 'lucide-react';
 import ChatHeader from '../components/Chat/ChatHeader';
 import api from '../utils/api';
-import tokenManager from '../utils/tokenManager';
 
 export default function ProfilePage() {
+    const navigate = useNavigate();
+    const { isAuthenticated, loading, logout } = useAuth();
     const [user, setUser] = useState(null);
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
@@ -24,10 +27,8 @@ export default function ProfilePage() {
             overlay.remove();
         }
 
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('You must be logged in to access your profile.');
-            window.location.href = '/login';
+        if (!isAuthenticated && !loading) {
+            navigate('/login');
             return;
         }
 
@@ -55,7 +56,7 @@ export default function ProfilePage() {
         setViewportHeight();
         window.addEventListener('resize', setViewportHeight);
         return () => window.removeEventListener('resize', setViewportHeight);
-    }, []);
+    }, [isAuthenticated, loading, navigate]);
 
     useEffect(() => {
         document.body.style.overflow = showMobileMenu ? 'hidden' : '';
@@ -96,9 +97,7 @@ export default function ProfilePage() {
     };
 
     const handleLogout = () => {
-        tokenManager.clearToken();
-        sessionStorage.clear();
-        window.location.href = '/login';
+        logout();
     };
 
     const getInitials = (name) => name.split(' ').map(n => n[0]).join('').toUpperCase();

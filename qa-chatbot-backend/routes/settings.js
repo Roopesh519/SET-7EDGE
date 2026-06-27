@@ -4,8 +4,13 @@ import User from '../models/User.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import ApiError from '../utils/ApiError.js';
 
 dotenv.config();
+
+if (!process.env.ENCRYPTION_KEY) {
+  throw new Error('ENCRYPTION_KEY must be set for settings encryption.');
+}
 
 const router = express.Router();
 
@@ -132,13 +137,10 @@ router.put('/api-key', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Failed to validate API key. Please try again.' });
         }
 
-        // Encrypt and store the API key
         const encryptedApiKey = encrypt(trimmedKey);
-        
         if (!encryptedApiKey) {
-            return res.status(500).json({ error: 'Failed to encrypt API key' });
+            throw new ApiError('Failed to encrypt API key', 500, 'ENCRYPTION_FAILED');
         }
-        
         await User.findByIdAndUpdate(userId, {
             togetherApiKey: encryptedApiKey
         });
@@ -146,7 +148,10 @@ router.put('/api-key', authMiddleware, async (req, res) => {
         res.json({ message: 'API key updated successfully' });
     } catch (error) {
         console.error('❌ Error updating API key:', error);
-        res.status(500).json({ error: 'Failed to update API key' });
+        if (error instanceof ApiError) {
+            return res.status(error.statusCode).json({ error: error.message, code: error.code });
+        }
+        res.status(500).json({ error: 'Failed to update API key', code: 'UPDATE_API_KEY_FAILED' });
     }
 });
 

@@ -2,8 +2,27 @@ import axios from 'axios';
 import tokenManager from './tokenManager';
 
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL,
+  baseURL: process.env.REACT_APP_API_BASE_URL || '',
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
+
+export const extractApiErrorMessage = (error) => {
+  if (error.response?.data?.error) {
+    return error.response.data.error;
+  }
+
+  if (error.response?.data?.message) {
+    return error.response.data.message;
+  }
+
+  if (error.message) {
+    return error.message;
+  }
+
+  return 'An unexpected error occurred.';
+};
 
 // ✅ Automatically attach token on each request
 instance.interceptors.request.use(async (config) => {

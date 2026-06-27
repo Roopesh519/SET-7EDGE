@@ -1,40 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Chat from './pages/Chat';
 import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage'; // Add this import
+import SettingsPage from './pages/SettingsPage';
 import HomePage from './pages/HomePage';
 import About from './pages/AboutUsPage';
-import AdminDashboard from './pages/AdminDashboard'; // Add this import
-import SessionExpiredModal from './components/modals/SessionExpiredModal'; // Add this import
-import SessionStatus from './components/SessionStatus'; // Add this import
-import tokenManager from './utils/tokenManager';
+import AdminDashboard from './pages/AdminDashboard';
+import SessionExpiredModal from './components/modals/SessionExpiredModal';
+import SessionStatus from './components/SessionStatus';
+import { useAuth } from './contexts/AuthContext';
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!tokenManager.getToken());
+  const { isAuthenticated, loading, user } = useAuth();
 
-  useEffect(() => {
-    // Listen to storage changes from login/logout
-    const handleStorageChange = () => {
-      setIsLoggedIn(!!tokenManager.getToken());
-    };
-
-    // Listen to token refresh events
-    const handleTokenRefreshed = () => {
-      setIsLoggedIn(true);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('tokenRefreshed', handleTokenRefreshed);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('tokenRefreshed', handleTokenRefreshed);
-    };
-  }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <p className="text-sm sm:text-base">Loading authentication state...</p>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -42,36 +30,36 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route
           path="/login"
-          element={!isLoggedIn ? <Login /> : <Navigate to="/chat" />}
+          element={!isAuthenticated ? <Login /> : <Navigate to="/chat" />}
         />
         <Route
           path="/register"
-          element={!isLoggedIn ? <Register /> : <Navigate to="/chat" />}
+          element={!isAuthenticated ? <Register /> : <Navigate to="/chat" />}
         />
         <Route
           path="/chat"
-          element={isLoggedIn ? <Chat /> : <Navigate to="/login" />}
+          element={isAuthenticated ? <Chat /> : <Navigate to="/login" />}
         />
         <Route
           path="/profile"
-          element={isLoggedIn ? <ProfilePage /> : <Navigate to="/login" />}
+          element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />}
         />
         <Route
           path="/settings"
-          element={isLoggedIn ? <SettingsPage /> : <Navigate to="/login" />}
+          element={isAuthenticated ? <SettingsPage /> : <Navigate to="/login" />}
         />
         <Route
           path="/about"
-          element={isLoggedIn ? <About /> : <Navigate to="/login" />}
+          element={isAuthenticated ? <About /> : <Navigate to="/login" />}
         />
         {/* Add admin route - protected by login and admin check happens in component */}
         <Route
           path="/admin"
-          element={isLoggedIn ? <AdminDashboard /> : <Navigate to="/login" />}
+          element={isAuthenticated ? (user?.isAdmin ? <AdminDashboard /> : <Navigate to="/chat" />) : <Navigate to="/login" />}
         />
         <Route
           path="*"
-          element={<Navigate to={isLoggedIn ? "/chat" : "/login"} />}
+          element={<Navigate to={isAuthenticated ? "/chat" : "/login"} />}
         />
       </Routes>
       

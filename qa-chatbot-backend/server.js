@@ -1,32 +1,58 @@
 // qa-chatbot-backend/server.js
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import settingsRoutes from './routes/settings.js';
 
 dotenv.config(); // ✅ Load env before importing routes
 
-console.log('🔐 JWT_SECRET loaded:', !!process.env.JWT_SECRET);
-console.log('🔑 HF_TOKEN loaded:', !!process.env.HF_TOKEN);
-console.log('🛢️ MONGO_URI loaded:', !!process.env.MONGO_URI);
+const requiredEnv = ['MONGO_URI', 'JWT_SECRET', 'ENCRYPTION_KEY', 'HF_TOKEN'];
+const missingVars = requiredEnv.filter(key => !process.env[key]);
+if (missingVars.length) {
+  console.error('❌ Missing required environment variables:', missingVars.join(', '));
+  process.exit(1);
+}
 
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chat.js';
 import profileRoutes from './routes/profile.js';
-import adminRoutes from './routes/admin.js'; // Add this import
+import adminRoutes from './routes/admin.js';
+import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+app.set('trust proxy', 1);
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_ORIGIN?.split(',') || ['http://localhost:3000'],
+  credentials: true
+}));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: false, limit: '10kb' }));
+
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 80,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Too many requests, please try again later.',
+    code: 'RATE_LIMIT_EXCEEDED'
+  }
+});
+app.use('/api', limiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/admin', adminRoutes); // Add this line
+app.use('/api/admin', adminRoutes);
+
+app.use(errorHandler);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

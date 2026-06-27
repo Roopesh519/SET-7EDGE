@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import tokenManager from '../utils/tokenManager';
 import ChatHeader from '../components/Chat/ChatHeader';
@@ -10,6 +12,8 @@ import ApiKeyModal from '../components/modals/ApiKeyModal';
 import MessageLimitModal from '../components/modals/MessageLimitModal';
 
 export default function Chat() {
+  const navigate = useNavigate();
+  const { isAuthenticated, loading, logout } = useAuth();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
@@ -18,10 +22,8 @@ export default function Chat() {
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const hasInitiallyLoaded = useRef(false);
-  const [viewportHeight, setViewportHeight] = useState(0);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(null); // null = loading, true/false = result
   const [trialStatus, setTrialStatus] = useState({
     hasApiKey: null,
     trialPromptsUsed: 0,
@@ -31,19 +33,17 @@ export default function Chat() {
   const chatRef = useRef();
   const mainContainerRef = useRef();
   const messagesContainerRef = useRef();
-  const token = localStorage.getItem('token');
+  const token = tokenManager.getToken();
   const TRIAL_LIMIT = 5;
   const CONVERSATION_MESSAGE_LIMIT = 50; // Maximum number of message pairs (user + assistant) per conversation
 
   const checkApiKeyStatus = async () => {
     try {
       const res = await api.get('/settings');
-      setHasApiKey(res.data.hasApiKey);
       return res.data.hasApiKey;
     } catch (err) {
       console.error('Failed to check API key status:', err);
       // Assume no API key on error
-      setHasApiKey(false);
       return false;
     }
   };
@@ -265,7 +265,6 @@ export default function Chat() {
   const updateViewportHeight = () => {
     // Use window.visualViewport for better mobile support
     const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    setViewportHeight(height);
     
     // Set CSS custom property
     const vh = height * 0.01;
@@ -275,7 +274,7 @@ export default function Chat() {
 
   const handleNavigateToSettings = () => {
     setShowApiKeyModal(false);
-    window.location.href = '/settings';
+    navigate('/settings');
   };
 
   const handleModalClose = () => {
@@ -292,9 +291,10 @@ export default function Chat() {
       overlay.remove();
     }
 
-    if (!token) {
+    if (!isAuthenticated && !loading) {
       alert('You must be logged in to use the chat.');
-      window.location.href = '/login';
+      navigate('/login');
+      return;
     }
 
     // Add chat-specific CSS class to body
@@ -331,7 +331,7 @@ export default function Chat() {
       window.removeEventListener('resize', updateViewportHeight);
       window.removeEventListener('orientationchange', updateViewportHeight);
     };
-  }, [token]);
+  }, [isAuthenticated, loading, navigate]);
 
   useEffect(() => {
     // Only auto-load the first conversation on initial load, not when user explicitly creates new chat
@@ -366,13 +366,11 @@ export default function Chat() {
   }, [messages]);
 
   const handleLogout = () => {
-    tokenManager.clearToken();
-    sessionStorage.clear();
+    logout();
     setMessages([]);
     setInput('');
     setShowSidebar(false);
     setShowMobileMenu(false);
-    window.location.href = '/login';
   };
 
   const handleNewChat = () => {

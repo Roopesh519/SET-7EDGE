@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -95,61 +97,36 @@ export default function Register() {
     }
   };
 
+  const { register: registerUser } = useAuth();
+  const navigate = useNavigate();
+
   const register = async () => {
-    // Clear previous errors
     setError('');
 
-    // Validate inputs
     if (!validateInputs()) {
       return;
     }
 
     try {
       setLoading(true);
+      const response = await registerUser({
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        password
+      });
 
-      const res = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/auth/register`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: username.trim(),
-            email: email.trim().toLowerCase(),
-            password
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (res.ok) {
-        // If registration returns a token, store it and navigate to chat
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          window.location.href = '/chat';
-        } else {
-          // If no token is returned, navigate to login with success message
-          localStorage.setItem('registrationSuccess', 'Registration successful! Please log in.');
-          window.location.href = '/login';
-        }
+      if (response?.token) {
+        navigate('/chat');
       } else {
-        // Handle HTTP error responses
-        const errorMessage = getErrorMessage(data, res.status);
-        setError(errorMessage);
+        localStorage.setItem('registrationSuccess', 'Registration successful! Please log in.');
+        navigate('/login');
       }
     } catch (err) {
       console.error('Registration error:', err);
-
-      // Handle network errors
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        setError('Network error. Please check your internet connection.');
-      } else if (err.name === 'SyntaxError') {
-        setError('Server response error. Please try again.');
-      } else {
-        setError(err.message || 'An unexpected error occurred during registration.');
-      }
+      const status = err.response?.status;
+      const payload = err.response?.data;
+      const errorMessage = payload?.error || payload?.message || getErrorMessage(payload, status);
+      setError(errorMessage || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -163,7 +140,7 @@ export default function Register() {
   };
 
   const navigateToLogin = () => {
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (

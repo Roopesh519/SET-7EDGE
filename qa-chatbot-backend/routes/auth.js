@@ -1,75 +1,92 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js'; // Notice the .js extension
+import User from '../models/User.js';
+import ApiError from '../utils/ApiError.js';
 
 const router = express.Router();
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      throw new ApiError('Username, email, and password are required.', 400, 'VALIDATION_ERROR');
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new ApiError('A user with this email already exists.', 409, 'USER_EXISTS');
+    }
+
     const hash = await bcrypt.hash(password, 10);
     const user = new User({ 
       username, 
       email, 
       password: hash,
-      isAdmin: false // Explicitly set to false for new registrations
+      isAdmin: false
     });
     await user.save();
     res.json({ message: 'Registered successfully' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Registration failed' });
+    if (err instanceof ApiError) {
+      return next(err);
+    }
+    console.error('Registration error:', err);
+    next(new ApiError('Registration failed', 500, 'REGISTRATION_FAILED'));
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) {
+      throw new ApiError('Invalid email or password.', 401, 'AUTHENTICATION_FAILED');
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: 'Incorrect password' });
+    if (!match) {
+      throw new ApiError('Invalid email or password.', 401, 'AUTHENTICATION_FAILED');
+    }
 
     const token = jwt.sign({ 
       id: user._id, 
-      userId: user._id // Add userId for consistency with admin middleware
+      userId: user._id,
+      email: user.email
     }, process.env.JWT_SECRET, { expiresIn: '1d' });
     
-    // Return user info including admin status
     res.json({ 
       token,
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
-        isAdmin: user.isAdmin || false, // Include admin status
+        isAdmin: user.isAdmin || false,
         trialPromptsUsed: user.trialPromptsUsed || 0
       }
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Login failed' });
+    if (err instanceof ApiError) {
+      return next(err);
+    }
+    console.error('Login error:', err);
+    next(new ApiError('Login failed', 500, 'LOGIN_FAILED'));
   }
 });
 
 // Add /me route to check current user info (including admin status)
-router.get('/me', async (req, res) => {
+router.get('/me', async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
     if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+      throw new ApiError('No token provided', 401, 'AUTH_REQUIRED');
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Handle both id and userId from token (for backward compatibility)
     const userId = decoded.userId || decoded.id;
     const user = await User.findById(userId).select('-password -togetherApiKey');
-    
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      throw new ApiError('User not found', 401, 'USER_NOT_FOUND');
     }
 
     res.json({ 
@@ -84,26 +101,29 @@ router.get('/me', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return next(error);
+    }
+    if (error.name === 'TokenExpiredError') {
+      return next(new ApiError('Token expired', 401, 'TOKEN_EXPIRED'));
+    }
     console.error('Auth /me error:', error);
-    res.status(401).json({ message: 'Invalid token' });
+    next(new ApiError('Invalid token', 401, 'INVALID_TOKEN'));
   }
 });
 
 // Add refresh token endpoint
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
     if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+      throw new ApiError('No token provided', 401, 'AUTH_REQUIRED');
     }
 
-    // Verify the token (even if expired, we can still decode it)
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-      // If token is expired, try to decode without verification
       if (error.name === 'TokenExpiredError') {
         decoded = jwt.decode(token);
       } else {
@@ -112,21 +132,19 @@ router.post('/refresh', async (req, res) => {
     }
 
     if (!decoded) {
-      return res.status(401).json({ message: 'Invalid token' });
+      throw new ApiError('Invalid token', 401, 'INVALID_TOKEN');
     }
 
-    // Handle both id and userId from token (for backward compatibility)
     const userId = decoded.userId || decoded.id;
     const user = await User.findById(userId).select('-password -togetherApiKey');
-    
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      throw new ApiError('User not found', 401, 'USER_NOT_FOUND');
     }
 
-    // Generate new token
     const newToken = jwt.sign({ 
       id: user._id, 
-      userId: user._id
+      userId: user._id,
+      email: user.email
     }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
     res.json({ 
@@ -140,8 +158,11 @@ router.post('/refresh', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return next(error);
+    }
     console.error('Token refresh error:', error);
-    res.status(401).json({ message: 'Token refresh failed' });
+    next(new ApiError('Token refresh failed', 401, 'TOKEN_REFRESH_FAILED'));
   }
 });
 
